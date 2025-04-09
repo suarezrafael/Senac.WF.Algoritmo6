@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 namespace Algoritmo6
 {
     internal static class Program
@@ -8,10 +10,27 @@ namespace Algoritmo6
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+
+            var builder = Host.CreateApplicationBuilder();
+
+            //builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            //var apiUrl = builder.Configuration.GetSection("ApiSettings:BaseUrl").Value;
+
+            // Adiciona HttpClient com base address
+            builder.Services.AddHttpClient("ApiClient", client =>
+            {
+                client.BaseAddress = new Uri("https://suaapi.com/api/");
+            });
+
+            // Registra a tela principal e outros forms/serviços
+            builder.Services.AddTransient<Form1>();
+
+            var host = builder.Build();
+
+            // Resolve a instância do Form1 com DI
+            var form = host.Services.GetRequiredService<Form1>();
+            Application.Run(form);
         }
     }
 }
